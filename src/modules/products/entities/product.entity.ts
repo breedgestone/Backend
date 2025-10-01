@@ -12,6 +12,7 @@ import {
 import { SubCategory } from '../../categories/entities/sub-category.entity';
 import { CartProduct } from '../../cart/entities/cart-product.entity';
 import { OrderItem } from '../../orders/entities/order-item.entity';
+import { Asset } from '../../../common/entities';
 
 @Entity('product')
 export class Product {
@@ -33,8 +34,8 @@ export class Product {
   @Column('varchar', { length: 255, name: 'price_unit', nullable: true })
   priceUnit?: string;
 
-  @Column('varchar', { length: 255, name: 'image_id', nullable: true })
-  imageId?: string;
+  @Column('bigint', { name: 'asset_id', unsigned: true, nullable: true })
+  assetId?: number;
 
   @Column('tinyint', { name: 'status', default: 1 })
   status: number;
@@ -49,6 +50,10 @@ export class Product {
   updatedAt: Date;
 
   // Relations
+  @ManyToOne(() => Asset, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'asset_id' })
+  asset?: Asset;
+
   @ManyToOne(() => SubCategory, (subCategory) => subCategory.products, {
     onDelete: 'CASCADE',
   })
