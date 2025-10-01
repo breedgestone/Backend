@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ChatStatus } from '../entities/chat.entity';
+import { ChatStatus } from '../../../common/enums';
 
 export class UpdateChatDto {
   @ApiPropertyOptional({

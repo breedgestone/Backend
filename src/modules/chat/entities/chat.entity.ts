@@ -11,11 +11,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { ChatMessage } from './chat-message.entity';
-
-export enum ChatStatus {
-  ACTIVE = 'active',
-  CLOSED = 'closed',
-}
+import { ChatStatus } from '../../../common/enums';
 
 @Entity('chats')
 export class Chat {
