@@ -6,9 +6,12 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { CategorySub } from './category-sub.entity';
 import { Product } from '../../products/entities/product.entity';
+import { Asset } from '../../../common/entities';
 
 @Entity('sub_category')
 export class SubCategory {
@@ -30,8 +33,8 @@ export class SubCategory {
   @Column('varchar', { length: 255, name: 'price_unit', nullable: true })
   priceUnit?: string;
 
-  @Column('varchar', { length: 255, name: 'image_id', nullable: true })
-  imageId?: string;
+  @Column('bigint', { name: 'asset_id', unsigned: true, nullable: true })
+  assetId?: number;
 
   @Column('tinyint', { name: 'status', default: 1 })
   status: number;
@@ -46,6 +49,10 @@ export class SubCategory {
   updatedAt: Date;
 
   // Relations
+  @ManyToOne(() => Asset, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'asset_id' })
+  asset?: Asset;
+
   @OneToMany(() => CategorySub, (categorySub) => categorySub.subCategory)
   categorySubs: CategorySub[];
 
