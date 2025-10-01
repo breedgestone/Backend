@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { TransformInterceptor } from './common/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -16,11 +18,16 @@ async function bootstrap() {
   const globalPrefix = configService.get<string>('app.globalPrefix', 'api/v1');
   app.setGlobalPrefix(globalPrefix);
   
+  // Global validation pipe
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
     transform: true,
   }));
+
+  app.useGlobalInterceptors(new TransformInterceptor());
+
+  app.useGlobalFilters(new HttpExceptionFilter());
   
   app.enableCors({
     origin: configService.get<string>('cors.origin', '*'),
