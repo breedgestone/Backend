@@ -24,14 +24,16 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
         let message = 'Success';
         let responseData = data;
 
-        // If the controller returns an object with a 'message' field, use it
-        if (data && typeof data === 'object' && 'message' in data) {
+        // If the controller returns an object with ONLY a 'message' field, use it as the message
+        // Otherwise, treat the entire object as data (including entities with message properties)
+        if (data && typeof data === 'object' && 'message' in data && Object.keys(data).length === 1) {
           message = data.message;
-          // Remove message from data if it exists, or use the whole object as data
-          if (Object.keys(data).length > 1) {
-            const { message: _, ...rest } = data;
-            responseData = rest;
-          }
+          responseData = null;
+        } else if (data && typeof data === 'object' && 'message' in data && !('id' in data)) {
+          // If it has message but no id (not an entity), extract the message
+          message = data.message;
+          const { message: _, ...rest } = data;
+          responseData = Object.keys(rest).length > 0 ? rest : null;
         }
 
         return {
