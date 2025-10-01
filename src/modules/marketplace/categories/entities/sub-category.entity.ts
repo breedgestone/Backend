@@ -5,28 +5,27 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
   ManyToOne,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
-import { SubCategory } from '../../categories/entities/sub-category.entity';
-import { CartProduct } from '../../cart/entities/cart-product.entity';
-import { OrderItem } from '../../orders/entities/order-item.entity';
-import { Asset } from '../../../common/entities';
+import { CategorySub } from './category-sub.entity';
+import { Product } from '../../products/entities/product.entity';
+import { Asset } from '../../../../common/entities';
 
-@Entity('product')
-export class Product {
+@Entity('sub_category')
+export class SubCategory {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
   id: number;
-
-  @Column('bigint', { name: 'sub_category_id', unsigned: true })
-  subCategoryId: number;
 
   @Column('varchar', { length: 255, name: 'name' })
   name: string;
 
-  @Column('varchar', { length: 255, name: 'description' })
-  description: string;
+  @Column('varchar', { length: 255, name: 'slug', unique: true })
+  slug: string;
+
+  @Column('text', { name: 'description', nullable: true })
+  description?: string;
 
   @Column('decimal', { name: 'price', precision: 12, scale: 2, nullable: true })
   price?: number;
@@ -54,15 +53,9 @@ export class Product {
   @JoinColumn({ name: 'asset_id' })
   asset?: Asset;
 
-  @ManyToOne(() => SubCategory, (subCategory) => subCategory.products, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'sub_category_id' })
-  subCategory: SubCategory;
+  @OneToMany(() => CategorySub, (categorySub) => categorySub.subCategory)
+  categorySubs: CategorySub[];
 
-  @OneToMany(() => CartProduct, (cartProduct) => cartProduct.product)
-  cartProducts: CartProduct[];
-
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
-  orderItems: OrderItem[];
+  @OneToMany(() => Product, (product) => product.subCategory)
+  products: Product[];
 }

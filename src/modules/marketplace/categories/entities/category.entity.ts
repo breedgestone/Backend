@@ -10,11 +10,10 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { CategorySub } from './category-sub.entity';
-import { Product } from '../../products/entities/product.entity';
-import { Asset } from '../../../common/entities';
+import { Asset } from '../../../../common/entities';
 
-@Entity('sub_category')
-export class SubCategory {
+@Entity('categories')
+export class Category {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
   id: number;
 
@@ -26,12 +25,6 @@ export class SubCategory {
 
   @Column('text', { name: 'description', nullable: true })
   description?: string;
-
-  @Column('decimal', { name: 'price', precision: 12, scale: 2, nullable: true })
-  price?: number;
-
-  @Column('varchar', { length: 255, name: 'price_unit', nullable: true })
-  priceUnit?: string;
 
   @Column('bigint', { name: 'asset_id', unsigned: true, nullable: true })
   assetId?: number;
@@ -53,9 +46,6 @@ export class SubCategory {
   @JoinColumn({ name: 'asset_id' })
   asset?: Asset;
 
-  @OneToMany(() => CategorySub, (categorySub) => categorySub.subCategory)
+  @OneToMany(() => CategorySub, (categorySub) => categorySub.category)
   categorySubs: CategorySub[];
-
-  @OneToMany(() => Product, (product) => product.subCategory)
-  products: Product[];
 }

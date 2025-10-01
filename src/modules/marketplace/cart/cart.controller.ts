@@ -15,7 +15,7 @@ import { CartService } from './cart.service';
 import { AddToCartDto, UpdateCartItemDto, CheckoutDto } from './dto';
 import { Cart } from './entities';
 import { Order } from '../orders/entities/order.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @ApiTags('cart')
 @ApiBearerAuth()
