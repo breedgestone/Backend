@@ -4,7 +4,7 @@ import { Repository, IsNull } from 'typeorm';
 import { Chat } from './entities/chat.entity';
 import { ChatMessage } from './entities/chat-message.entity';
 import { CreateChatDto, SendMessageDto, UpdateChatDto } from './dto';
-import { ChatStatus } from './entities/chat.entity';
+import { ChatStatus } from '../../common/enums';
 
 @Injectable()
 export class ChatService {
