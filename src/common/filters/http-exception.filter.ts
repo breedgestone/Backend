@@ -7,13 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-
-export interface ErrorResponse {
-  statusCode: number;
-  message: string;
-  error?: string;
-  errors?: any[];
-}
+import { ErrorResponse } from '../interfaces';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
