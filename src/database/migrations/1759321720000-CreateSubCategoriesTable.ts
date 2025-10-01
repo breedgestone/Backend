@@ -1,11 +1,11 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from "typeorm";
 
-export class CreateCategoriesTable1736528410000 implements MigrationInterface {
+export class CreateSubCategoriesTable1759321720000 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: 'categories',
+                name: 'sub_category',
                 columns: [
                     {
                         name: 'id',
@@ -32,9 +32,22 @@ export class CreateCategoriesTable1736528410000 implements MigrationInterface {
                         isNullable: true,
                     },
                     {
-                        name: 'image_id',
+                        name: 'price',
+                        type: 'decimal',
+                        precision: 12,
+                        scale: 2,
+                        isNullable: true,
+                    },
+                    {
+                        name: 'price_unit',
                         type: 'varchar',
                         length: '255',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'asset_id',
+                        type: 'bigint',
+                        unsigned: true,
                         isNullable: true,
                     },
                     {
@@ -66,24 +79,38 @@ export class CreateCategoriesTable1736528410000 implements MigrationInterface {
 
         // Create index on slug for faster lookups
         await queryRunner.createIndex(
-            'categories',
+            'sub_category',
             new TableIndex({
-                name: 'IDX_CATEGORY_SLUG',
+                name: 'IDX_SUB_CATEGORY_SLUG',
                 columnNames: ['slug'],
             }),
         );
 
         // Create index on status for filtering
         await queryRunner.createIndex(
-            'categories',
+            'sub_category',
             new TableIndex({
-                name: 'IDX_CATEGORY_STATUS',
+                name: 'IDX_SUB_CATEGORY_STATUS',
                 columnNames: ['status'],
+            }),
+        );
+
+        // Create foreign key for asset_id
+        await queryRunner.createForeignKey(
+            'sub_category',
+            new TableForeignKey({
+                columnNames: ['asset_id'],
+                referencedTableName: 'assets',
+                referencedColumnNames: ['id'],
+                onDelete: 'SET NULL',
+                onUpdate: 'CASCADE',
+                name: 'fk_sub_category_asset',
             }),
         );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('categories', true);
+        await queryRunner.dropForeignKey('sub_category', 'fk_sub_category_asset');
+        await queryRunner.dropTable('sub_category', true);
     }
 }

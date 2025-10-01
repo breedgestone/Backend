@@ -1,11 +1,11 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from "typeorm";
 
-export class CreateCartProductsTable1736528460000 implements MigrationInterface {
+export class CreateOrderItemsTable1759321780000 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: 'cart_product',
+                name: 'order_items',
                 columns: [
                     {
                         name: 'id',
@@ -16,12 +16,7 @@ export class CreateCartProductsTable1736528460000 implements MigrationInterface 
                         unsigned: true,
                     },
                     {
-                        name: 'cart_id',
-                        type: 'bigint',
-                        unsigned: true,
-                    },
-                    {
-                        name: 'sub_category_id',
+                        name: 'order_id',
                         type: 'bigint',
                         unsigned: true,
                     },
@@ -29,12 +24,34 @@ export class CreateCartProductsTable1736528460000 implements MigrationInterface 
                         name: 'product_id',
                         type: 'bigint',
                         unsigned: true,
+                    },
+                    {
+                        name: 'variation_id',
+                        type: 'bigint',
+                        unsigned: true,
                         isNullable: true,
                     },
                     {
                         name: 'quantity',
                         type: 'int',
-                        default: 1,
+                    },
+                    {
+                        name: 'price',
+                        type: 'decimal',
+                        precision: 20,
+                        scale: 2,
+                    },
+                    {
+                        name: 'total',
+                        type: 'decimal',
+                        precision: 20,
+                        scale: 2,
+                    },
+                    {
+                        name: 'deleted_at',
+                        type: 'timestamp',
+                        isNullable: true,
+                        default: null,
                     },
                     {
                         name: 'created_at',
@@ -52,12 +69,12 @@ export class CreateCartProductsTable1736528460000 implements MigrationInterface 
             true,
         );
 
-        // Create foreign key for cart_id
+        // Create foreign key for order_id
         await queryRunner.createForeignKey(
-            'cart_product',
+            'order_items',
             new TableForeignKey({
-                columnNames: ['cart_id'],
-                referencedTableName: 'carts',
+                columnNames: ['order_id'],
+                referencedTableName: 'orders',
                 referencedColumnNames: ['id'],
                 onDelete: 'CASCADE',
                 onUpdate: 'RESTRICT',
@@ -66,44 +83,44 @@ export class CreateCartProductsTable1736528460000 implements MigrationInterface 
 
         // Create foreign key for product_id
         await queryRunner.createForeignKey(
-            'cart_product',
+            'order_items',
             new TableForeignKey({
                 columnNames: ['product_id'],
                 referencedTableName: 'product',
                 referencedColumnNames: ['id'],
-                onDelete: 'CASCADE',
+                onDelete: 'RESTRICT',
                 onUpdate: 'RESTRICT',
             }),
         );
 
         // Create indexes on foreign keys
         await queryRunner.createIndex(
-            'cart_product',
+            'order_items',
             new TableIndex({
-                name: 'IDX_CART_PRODUCT_CART',
-                columnNames: ['cart_id'],
+                name: 'IDX_ORDER_ITEM_ORDER',
+                columnNames: ['order_id'],
             }),
         );
 
         await queryRunner.createIndex(
-            'cart_product',
+            'order_items',
             new TableIndex({
-                name: 'IDX_CART_PRODUCT_PRODUCT',
+                name: 'IDX_ORDER_ITEM_PRODUCT',
                 columnNames: ['product_id'],
             }),
         );
 
-        // Create composite index for cart and product
+        // Create composite index for efficient querying
         await queryRunner.createIndex(
-            'cart_product',
+            'order_items',
             new TableIndex({
-                name: 'IDX_CART_PRODUCT_UNIQUE',
-                columnNames: ['cart_id', 'product_id'],
+                name: 'IDX_ORDER_ITEM_ORDER_PRODUCT',
+                columnNames: ['order_id', 'product_id'],
             }),
         );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('cart_product', true);
+        await queryRunner.dropTable('order_items', true);
     }
 }

@@ -1,11 +1,11 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from "typeorm";
 
-export class CreateSubCategoriesTable1736528420000 implements MigrationInterface {
+export class CreateProductsTable1759321740000 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: 'sub_category',
+                name: 'product',
                 columns: [
                     {
                         name: 'id',
@@ -16,20 +16,19 @@ export class CreateSubCategoriesTable1736528420000 implements MigrationInterface
                         unsigned: true,
                     },
                     {
+                        name: 'sub_category_id',
+                        type: 'bigint',
+                        unsigned: true,
+                    },
+                    {
                         name: 'name',
                         type: 'varchar',
                         length: '255',
                     },
                     {
-                        name: 'slug',
+                        name: 'description',
                         type: 'varchar',
                         length: '255',
-                        isUnique: true,
-                    },
-                    {
-                        name: 'description',
-                        type: 'text',
-                        isNullable: true,
                     },
                     {
                         name: 'price',
@@ -45,9 +44,9 @@ export class CreateSubCategoriesTable1736528420000 implements MigrationInterface
                         isNullable: true,
                     },
                     {
-                        name: 'image_id',
-                        type: 'varchar',
-                        length: '255',
+                        name: 'asset_id',
+                        type: 'bigint',
+                        unsigned: true,
                         isNullable: true,
                     },
                     {
@@ -77,26 +76,61 @@ export class CreateSubCategoriesTable1736528420000 implements MigrationInterface
             true,
         );
 
-        // Create index on slug for faster lookups
+        // Create foreign key for sub_category_id
+        await queryRunner.createForeignKey(
+            'product',
+            new TableForeignKey({
+                columnNames: ['sub_category_id'],
+                referencedTableName: 'sub_category',
+                referencedColumnNames: ['id'],
+                onDelete: 'CASCADE',
+                onUpdate: 'RESTRICT',
+            }),
+        );
+
+        // Create index on foreign key
         await queryRunner.createIndex(
-            'sub_category',
+            'product',
             new TableIndex({
-                name: 'IDX_SUB_CATEGORY_SLUG',
-                columnNames: ['slug'],
+                name: 'IDX_PRODUCT_SUB_CATEGORY',
+                columnNames: ['sub_category_id'],
             }),
         );
 
         // Create index on status for filtering
         await queryRunner.createIndex(
-            'sub_category',
+            'product',
             new TableIndex({
-                name: 'IDX_SUB_CATEGORY_STATUS',
+                name: 'IDX_PRODUCT_STATUS',
                 columnNames: ['status'],
+            }),
+        );
+
+        // Create index on name for searching
+        await queryRunner.createIndex(
+            'product',
+            new TableIndex({
+                name: 'IDX_PRODUCT_NAME',
+                columnNames: ['name'],
+            }),
+        );
+
+        // Create foreign key for asset_id
+        await queryRunner.createForeignKey(
+            'product',
+            new TableForeignKey({
+                columnNames: ['asset_id'],
+                referencedTableName: 'assets',
+                referencedColumnNames: ['id'],
+                onDelete: 'SET NULL',
+                onUpdate: 'CASCADE',
+                name: 'fk_product_asset',
             }),
         );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('sub_category', true);
+        await queryRunner.dropForeignKey('product', 'fk_product_asset');
+        await queryRunner.dropTable('product', true);
     }
 }

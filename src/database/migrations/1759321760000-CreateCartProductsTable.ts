@@ -1,11 +1,11 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from "typeorm";
 
-export class CreateCategorySubsTable1736528430000 implements MigrationInterface {
+export class CreateCartProductsTable1759321760000 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: 'category_subs',
+                name: 'cart_product',
                 columns: [
                     {
                         name: 'id',
@@ -16,7 +16,7 @@ export class CreateCategorySubsTable1736528430000 implements MigrationInterface 
                         unsigned: true,
                     },
                     {
-                        name: 'category_id',
+                        name: 'cart_id',
                         type: 'bigint',
                         unsigned: true,
                     },
@@ -24,6 +24,17 @@ export class CreateCategorySubsTable1736528430000 implements MigrationInterface 
                         name: 'sub_category_id',
                         type: 'bigint',
                         unsigned: true,
+                    },
+                    {
+                        name: 'product_id',
+                        type: 'bigint',
+                        unsigned: true,
+                        isNullable: true,
+                    },
+                    {
+                        name: 'quantity',
+                        type: 'int',
+                        default: 1,
                     },
                     {
                         name: 'created_at',
@@ -41,24 +52,24 @@ export class CreateCategorySubsTable1736528430000 implements MigrationInterface 
             true,
         );
 
-        // Create foreign key for category_id
+        // Create foreign key for cart_id
         await queryRunner.createForeignKey(
-            'category_subs',
+            'cart_product',
             new TableForeignKey({
-                columnNames: ['category_id'],
-                referencedTableName: 'categories',
+                columnNames: ['cart_id'],
+                referencedTableName: 'carts',
                 referencedColumnNames: ['id'],
                 onDelete: 'CASCADE',
                 onUpdate: 'RESTRICT',
             }),
         );
 
-        // Create foreign key for sub_category_id
+        // Create foreign key for product_id
         await queryRunner.createForeignKey(
-            'category_subs',
+            'cart_product',
             new TableForeignKey({
-                columnNames: ['sub_category_id'],
-                referencedTableName: 'sub_category',
+                columnNames: ['product_id'],
+                referencedTableName: 'product',
                 referencedColumnNames: ['id'],
                 onDelete: 'CASCADE',
                 onUpdate: 'RESTRICT',
@@ -67,33 +78,32 @@ export class CreateCategorySubsTable1736528430000 implements MigrationInterface 
 
         // Create indexes on foreign keys
         await queryRunner.createIndex(
-            'category_subs',
+            'cart_product',
             new TableIndex({
-                name: 'IDX_CATEGORY_SUB_CATEGORY',
-                columnNames: ['category_id'],
+                name: 'IDX_CART_PRODUCT_CART',
+                columnNames: ['cart_id'],
             }),
         );
 
         await queryRunner.createIndex(
-            'category_subs',
+            'cart_product',
             new TableIndex({
-                name: 'IDX_CATEGORY_SUB_SUB_CATEGORY',
-                columnNames: ['sub_category_id'],
+                name: 'IDX_CART_PRODUCT_PRODUCT',
+                columnNames: ['product_id'],
             }),
         );
 
-        // Create unique composite index to prevent duplicate relationships
+        // Create composite index for cart and product
         await queryRunner.createIndex(
-            'category_subs',
+            'cart_product',
             new TableIndex({
-                name: 'IDX_CATEGORY_SUB_UNIQUE',
-                columnNames: ['category_id', 'sub_category_id'],
-                isUnique: true,
+                name: 'IDX_CART_PRODUCT_UNIQUE',
+                columnNames: ['cart_id', 'product_id'],
             }),
         );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('category_subs', true);
+        await queryRunner.dropTable('cart_product', true);
     }
 }

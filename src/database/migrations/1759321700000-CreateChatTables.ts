@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from "typeorm";
 
-export class CreateChatTables1736528400000 implements MigrationInterface {
+export class CreateChatTables1759321700000 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         // Create chats table

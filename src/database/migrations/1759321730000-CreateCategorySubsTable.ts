@@ -1,11 +1,11 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from "typeorm";
 
-export class CreateOrderItemsTable1736528480000 implements MigrationInterface {
+export class CreateCategorySubsTable1759321730000 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: 'order_items',
+                name: 'category_subs',
                 columns: [
                     {
                         name: 'id',
@@ -16,42 +16,14 @@ export class CreateOrderItemsTable1736528480000 implements MigrationInterface {
                         unsigned: true,
                     },
                     {
-                        name: 'order_id',
+                        name: 'category_id',
                         type: 'bigint',
                         unsigned: true,
                     },
                     {
-                        name: 'product_id',
+                        name: 'sub_category_id',
                         type: 'bigint',
                         unsigned: true,
-                    },
-                    {
-                        name: 'variation_id',
-                        type: 'bigint',
-                        unsigned: true,
-                        isNullable: true,
-                    },
-                    {
-                        name: 'quantity',
-                        type: 'int',
-                    },
-                    {
-                        name: 'price',
-                        type: 'decimal',
-                        precision: 20,
-                        scale: 2,
-                    },
-                    {
-                        name: 'total',
-                        type: 'decimal',
-                        precision: 20,
-                        scale: 2,
-                    },
-                    {
-                        name: 'deleted_at',
-                        type: 'timestamp',
-                        isNullable: true,
-                        default: null,
                     },
                     {
                         name: 'created_at',
@@ -69,58 +41,59 @@ export class CreateOrderItemsTable1736528480000 implements MigrationInterface {
             true,
         );
 
-        // Create foreign key for order_id
+        // Create foreign key for category_id
         await queryRunner.createForeignKey(
-            'order_items',
+            'category_subs',
             new TableForeignKey({
-                columnNames: ['order_id'],
-                referencedTableName: 'orders',
+                columnNames: ['category_id'],
+                referencedTableName: 'categories',
                 referencedColumnNames: ['id'],
                 onDelete: 'CASCADE',
                 onUpdate: 'RESTRICT',
             }),
         );
 
-        // Create foreign key for product_id
+        // Create foreign key for sub_category_id
         await queryRunner.createForeignKey(
-            'order_items',
+            'category_subs',
             new TableForeignKey({
-                columnNames: ['product_id'],
-                referencedTableName: 'product',
+                columnNames: ['sub_category_id'],
+                referencedTableName: 'sub_category',
                 referencedColumnNames: ['id'],
-                onDelete: 'RESTRICT',
+                onDelete: 'CASCADE',
                 onUpdate: 'RESTRICT',
             }),
         );
 
         // Create indexes on foreign keys
         await queryRunner.createIndex(
-            'order_items',
+            'category_subs',
             new TableIndex({
-                name: 'IDX_ORDER_ITEM_ORDER',
-                columnNames: ['order_id'],
+                name: 'IDX_CATEGORY_SUB_CATEGORY',
+                columnNames: ['category_id'],
             }),
         );
 
         await queryRunner.createIndex(
-            'order_items',
+            'category_subs',
             new TableIndex({
-                name: 'IDX_ORDER_ITEM_PRODUCT',
-                columnNames: ['product_id'],
+                name: 'IDX_CATEGORY_SUB_SUB_CATEGORY',
+                columnNames: ['sub_category_id'],
             }),
         );
 
-        // Create composite index for efficient querying
+        // Create unique composite index to prevent duplicate relationships
         await queryRunner.createIndex(
-            'order_items',
+            'category_subs',
             new TableIndex({
-                name: 'IDX_ORDER_ITEM_ORDER_PRODUCT',
-                columnNames: ['order_id', 'product_id'],
+                name: 'IDX_CATEGORY_SUB_UNIQUE',
+                columnNames: ['category_id', 'sub_category_id'],
+                isUnique: true,
             }),
         );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('order_items', true);
+        await queryRunner.dropTable('category_subs', true);
     }
 }
