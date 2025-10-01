@@ -7,13 +7,14 @@ import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './database.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ChatModule } from './modules/chat/chat.module';
-import { CategoriesModule } from './modules/categories/categories.module';
-import { ProductsModule } from './modules/products/products.module';
-import { CartModule } from './modules/cart/cart.module';
-import { OrdersModule } from './modules/orders/orders.module';
+import { CategoriesModule } from './modules/marketplace/categories/categories.module';
+import { ProductsModule } from './modules/marketplace/products/products.module';
+import { CartModule } from './modules/marketplace/cart/cart.module';
+import { OrdersModule } from './modules/marketplace/orders/orders.module';
 import { PropertyModule } from './modules/property/property.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -34,6 +35,7 @@ import configuration from './config/configuration';
     PropertyModule,
     AdminModule,
     PaymentModule,
+    AppointmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
