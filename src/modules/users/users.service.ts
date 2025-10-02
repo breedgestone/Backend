@@ -292,7 +292,14 @@ export class UsersService {
    * Change password for authenticated user (requires current password)
    */
   async changePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
-    const user = await this.findOne(userId);
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'email', 'password'],
+    });
+    
+    if (!user) {
+      throw new NotFoundException(`User not found`);
+    }
     
     if (!user.password) {
       throw new BadRequestException('No password set. Please set a password first or use password reset.');
