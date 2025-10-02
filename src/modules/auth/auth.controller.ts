@@ -114,7 +114,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ 
     summary: 'Change password (authenticated)',
     description: 'Change password for authenticated user. Requires current password verification.'

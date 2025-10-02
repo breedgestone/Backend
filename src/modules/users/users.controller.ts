@@ -17,7 +17,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ 
     summary: 'Get current user profile',
     description: 'Retrieve full profile information for authenticated user including metadata and linked auth providers.'
@@ -51,7 +51,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ 
     summary: 'Get current user (alias)',
     description: 'Alternative endpoint to retrieve authenticated user profile. Same as /users/profile.'
@@ -88,7 +88,7 @@ export class UsersController {
   }
 
   @Get()
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ 
     summary: 'Get all users (Admin)',
     description: 'Retrieve list of all users. Admin only endpoint.'
@@ -124,7 +124,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ 
     summary: 'Get user by ID',
     description: 'Retrieve specific user information by user ID.'
@@ -155,7 +155,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ 
     summary: 'Update user',
     description: 'Update user information. Users can update their own profile, admins can update any user.'
@@ -184,7 +184,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ 
     summary: 'Delete user (Admin)',
     description: 'Soft delete user account. Admin only endpoint.'

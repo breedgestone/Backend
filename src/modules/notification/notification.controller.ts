@@ -6,7 +6,7 @@ import {
 import { NotificationService } from './notification.service';
 
 @ApiTags('Notifications')
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('accessToken')
 @Controller('notification')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}

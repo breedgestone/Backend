@@ -48,11 +48,11 @@ async function bootstrap() {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'JWT',
+        name: 'Authorization',
         description: 'Enter JWT token',
         in: 'header',
       },
-      'JWT-auth', // This name here is important for later reference
+      'accessToken', // Use 'accessToken' to match Postman collection variable name
     )
     .addServer(`http://localhost:${configService.get<number>('app.port', 3000)}`, 'Local Development')
     .addServer('https://staging.breedgestone.com', 'Staging Server')
