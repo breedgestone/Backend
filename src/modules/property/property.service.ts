@@ -34,6 +34,8 @@ export class PropertyService {
   }): Promise<Property[]> {
     const query = this.propertyRepository.createQueryBuilder('property')
       .leftJoinAndSelect('property.agent', 'agent')
+      .leftJoinAndSelect('property.assets', 'assets')
+      .leftJoinAndSelect('property.fees', 'fees')
       .where('property.deletedAt IS NULL');
 
     if (filters?.status) {
@@ -67,7 +69,7 @@ export class PropertyService {
   async findApproved(): Promise<Property[]> {
     return await this.propertyRepository.find({
       where: { status: PropertyStatus.APPROVED },
-      relations: ['agent'],
+      relations: ['agent', 'assets', 'fees'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -76,7 +78,7 @@ export class PropertyService {
   async findByAgent(agentId: number): Promise<Property[]> {
     return await this.propertyRepository.find({
       where: { agentId },
-      relations: ['agent', 'approver'],
+      relations: ['agent', 'assets', 'fees'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -85,7 +87,7 @@ export class PropertyService {
   async findOne(id: number): Promise<Property> {
     const property = await this.propertyRepository.findOne({
       where: { id },
-      relations: ['agent', 'approver'],
+      relations: ['agent', 'assets', 'fees'],
     });
 
     if (!property) {
