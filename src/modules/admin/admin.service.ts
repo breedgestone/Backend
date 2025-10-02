@@ -324,8 +324,6 @@ export class AdminService {
       status: property.status,
       rejectionReason: property.rejectionReason,
       agentId: property.agentId,
-      approverName:
-        property.approver?.firstName + ' ' + property.approver?.lastName,
       approvedAt: property.approvedAt,
     }));
   }
