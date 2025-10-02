@@ -19,6 +19,7 @@ export default () => ({
     port: parseInt(process.env.PORT || '3000', 10),
     nodeEnv: process.env.NODE_ENV || 'development',
     globalPrefix: 'api/v1',
+    url: process.env.APP_URL || 'http://localhost:3000',
   },
 
   cors: {
@@ -59,5 +60,15 @@ export default () => ({
 
   push: {
     enabled: process.env.PUSH_NOTIFICATIONS_ENABLED === 'true',
+  },
+
+  payment: {
+    provider: process.env.PAYMENT_PROVIDER || 'paystack', // 'paystack' or 'flutterwave'
+    paystack: {
+      secretKey: process.env.PAYSTACK_SECRET_KEY || 'sk_test_xxx',
+    },
+    flutterwave: {
+      secretKey: process.env.FLUTTERWAVE_SECRET_KEY || 'FLWSECK_TEST-xxx',
+    },
   },
 });
