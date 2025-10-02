@@ -66,6 +66,12 @@ export class CreateOrdersTable1759321770000 implements MigrationInterface {
                         default: 0,
                     },
                     {
+                        name: 'payment_reference',
+                        type: 'varchar',
+                        length: '255',
+                        isNullable: true,
+                    },
+                    {
                         name: 'tax',
                         type: 'decimal',
                         precision: 8,
