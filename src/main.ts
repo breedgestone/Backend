@@ -23,6 +23,10 @@ async function bootstrap() {
     whitelist: true,
     forbidNonWhitelisted: true,
     transform: true,
+    transformOptions: {
+      excludeExtraneousValues: false, // Don't require @Expose(), just respect @Exclude()
+      enableImplicitConversion: true,
+    },
   }));
 
   app.useGlobalInterceptors(new TransformInterceptor());
