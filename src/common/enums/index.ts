@@ -8,5 +8,6 @@ export * from './property-size.enum';
 export * from './furnishing-type.enum';
 export * from './approval-action.enum';
 export * from './chat-status.enum';
+export * from './reviewable-type.enum';
 export * from './asset-type.enum';
 export * from './appointment-status.enum';
