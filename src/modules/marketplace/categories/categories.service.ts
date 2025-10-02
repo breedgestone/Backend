@@ -27,20 +27,41 @@ export class CategoriesService {
   }
 
   async findAllCategories(): Promise<Category[]> {
-    return await this.categoryRepository.find({
+    // Load all categories with their junction table relationships in ONE query
+    const categories = await this.categoryRepository.find({
       where: { deletedAt: IsNull() },
-      relations: ['categorySubs', 'categorySubs.subCategory'],
+      relations: ['categorySubs', 'categorySubs.subCategory', 'categorySubs.subCategory.products'],
     });
+
+    // Transform the data structure: extract subcategories from junction table
+    for (const category of categories) {
+      if (category.categorySubs && category.categorySubs.length > 0) {
+        // Extract just the subcategories (with their products already loaded)
+        category.subCategories = category.categorySubs.map(cs => cs.subCategory);
+      } else {
+        category.subCategories = [];
+      }
+    }
+
+    return categories;
   }
 
   async findCategoryById(id: number): Promise<Category> {
     const category = await this.categoryRepository.findOne({
       where: { id, deletedAt: IsNull() },
-      relations: ['categorySubs', 'categorySubs.subCategory'],
+      relations: ['categorySubs', 'categorySubs.subCategory', 'categorySubs.subCategory.products'],
     });
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
+
+    // Transform the data structure: extract subcategories from junction table
+    if (category.categorySubs && category.categorySubs.length > 0) {
+      category.subCategories = category.categorySubs.map(cs => cs.subCategory);
+    } else {
+      category.subCategories = [];
+    }
+
     return category;
   }
 
@@ -62,10 +83,19 @@ export class CategoriesService {
   }
 
   async findAllSubCategories(): Promise<SubCategory[]> {
-    return await this.subCategoryRepository.find({
+    const subCategories = await this.subCategoryRepository.find({
       where: { deletedAt: IsNull() },
-      relations: ['products'],
+      relations: ['products', 'categorySubs', 'categorySubs.category'],
     });
+
+    // Transform to add parent categories if needed
+    for (const subCategory of subCategories) {
+      if (subCategory.categorySubs && subCategory.categorySubs.length > 0) {
+        subCategory.categories = subCategory.categorySubs.map(cs => cs.category);
+      }
+    }
+
+    return subCategories;
   }
 
   async findSubCategoryById(id: number): Promise<SubCategory> {
