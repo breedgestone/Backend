@@ -37,14 +37,32 @@ export class CartService {
     // Verify product exists
     const product = await this.productsService.findProductById(addToCartDto.productId);
 
+    if (addToCartDto.subCategoryId) {
+      if (!product.subCategoryId) {
+        throw new BadRequestException(
+          `Product does not belong to any subcategory`
+        );
+      }
+      
+      const productSubCategoryId = Number(product.subCategoryId);
+      const requestedSubCategoryId = Number(addToCartDto.subCategoryId);
+      
+      if (productSubCategoryId !== requestedSubCategoryId) {
+        throw new BadRequestException(
+          `Product does not belong to subcategory`
+        );
+      }
+    }
+
     // Get or create cart
     const cart = await this.getOrCreateCart(userId);
 
-    // Check if product already in cart
+    // Check if product already in cart with same subcategory
     const existingCartProduct = await this.cartProductRepository.findOne({
       where: {
         cartId: cart.id,
         productId: addToCartDto.productId,
+        subCategoryId: addToCartDto.subCategoryId || product.subCategoryId,
       },
     });
 
@@ -53,11 +71,12 @@ export class CartService {
       existingCartProduct.quantity += addToCartDto.quantity;
       await this.cartProductRepository.save(existingCartProduct);
     } else {
-      // Add new cart product
+      // Add new cart product with validated subCategoryId
       const cartProduct = this.cartProductRepository.create({
         cartId: cart.id,
         productId: addToCartDto.productId,
         quantity: addToCartDto.quantity,
+        subCategoryId: addToCartDto.subCategoryId || product.subCategoryId,
       });
       await this.cartProductRepository.save(cartProduct);
     }
