@@ -61,11 +61,15 @@ export class OrdersService {
     // Create order items
     for (const item of createOrderDto.items) {
       const product = await this.productsService.findProductById(item.productId);
+      const itemPrice = product.price || 0;
+      const itemTotal = itemPrice * item.quantity;
+      
       const orderItem = this.orderItemRepository.create({
         orderId: savedOrder.id,
         productId: item.productId,
         quantity: item.quantity,
-        price: product.price || 0,
+        price: itemPrice,
+        total: itemTotal,
       });
       await this.orderItemRepository.save(orderItem);
     }
