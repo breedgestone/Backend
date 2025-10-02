@@ -9,7 +9,9 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { CategorySub } from './category-sub.entity';
+import { Category } from './category.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Asset } from '../../../../common/entities';
 
@@ -39,12 +41,15 @@ export class SubCategory {
   @Column('tinyint', { name: 'status', default: 1 })
   status: number;
 
+  @Exclude()
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
+  @Exclude()
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
@@ -53,9 +58,13 @@ export class SubCategory {
   @JoinColumn({ name: 'asset_id' })
   asset?: Asset;
 
+  @Exclude()
   @OneToMany(() => CategorySub, (categorySub) => categorySub.subCategory)
   categorySubs: CategorySub[];
 
   @OneToMany(() => Product, (product) => product.subCategory)
   products: Product[];
+
+  // Virtual property to hold parent categories (populated in service layer)
+  categories?: Category[];
 }

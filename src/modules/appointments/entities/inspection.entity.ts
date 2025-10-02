@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
 import { Property } from '../../property/entities/property.entity';
 import { AppointmentStatus } from '../../../common/enums';
@@ -71,8 +72,14 @@ export class Inspection {
   @Column('text', { name: 'cancellation_reason', nullable: true })
   cancellationReason?: string;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Property } from './property.entity';
 
 @Entity('property_fees')
@@ -29,8 +30,14 @@ export class PropertyFee {
   @Column('decimal', { name: 'price', precision: 15, scale: 2 })
   price: number;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

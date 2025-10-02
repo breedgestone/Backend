@@ -9,6 +9,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
 import { PropertyStatus, PropertyType, FurnishingType, PropertySize } from '../../../common/enums';
 import { Asset } from '../../../common/entities';
@@ -94,11 +95,20 @@ export class Property {
   @Column('boolean', { name: 'is_featured', default: false })
   isFeatured: boolean;
 
+  @Exclude()
+
+
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
@@ -108,11 +118,7 @@ export class Property {
   @JoinColumn({ name: 'agent_id' })
   agent: User;
 
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'approved_by' })
-  approver?: User;
-
-  @OneToMany(() => Asset, (asset) => asset.propertyId, { cascade: true })
+  @OneToMany(() => Asset, (asset) => asset.property, { cascade: true })
   assets: Asset[];
 
   @OneToMany(() => PropertyFee, (fee) => fee.property, { cascade: true })

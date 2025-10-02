@@ -9,6 +9,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
 import { ChatMessage } from './chat-message.entity';
 import { ChatStatus } from '../../../common/enums';
@@ -40,11 +41,20 @@ export class Chat {
   @Column('int', { name: 'unread_user2', default: 0 })
   unreadUser2: number;
 
+  @Exclude()
+
+
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

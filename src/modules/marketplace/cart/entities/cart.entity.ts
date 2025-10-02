@@ -8,6 +8,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from '../../../users/entities/user.entity';
 import { CartProduct } from './cart-product.entity';
 
@@ -22,8 +23,14 @@ export class Cart {
   @Column('bigint', { name: 'guest_id', unsigned: true, nullable: true })
   guestId?: number;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

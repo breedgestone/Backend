@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Category } from './category.entity';
 import { SubCategory } from './sub-category.entity';
 
@@ -21,8 +22,14 @@ export class CategorySub {
   @Column('bigint', { name: 'sub_category_id', unsigned: true })
   subCategoryId: number;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

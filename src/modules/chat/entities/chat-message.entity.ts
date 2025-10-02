@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
 import { Chat } from './chat.entity';
 
@@ -28,11 +29,20 @@ export class ChatMessage {
   @Column('boolean', { name: 'is_read', default: false })
   isRead: boolean;
 
+  @Exclude()
+
+
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

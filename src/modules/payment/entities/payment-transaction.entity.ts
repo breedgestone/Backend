@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity('payment_transactions')
 export class PaymentTransaction {
@@ -65,8 +66,14 @@ export class PaymentTransaction {
   @Column('timestamp', { name: 'paid_at', nullable: true })
   paidAt?: Date;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

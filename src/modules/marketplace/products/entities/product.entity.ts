@@ -9,6 +9,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { SubCategory } from '../../categories/entities/sub-category.entity';
 import { CartProduct } from '../../cart/entities/cart-product.entity';
 import { OrderItem } from '../../orders/entities/order-item.entity';
@@ -40,12 +41,15 @@ export class Product {
   @Column('tinyint', { name: 'status', default: 1 })
   status: number;
 
+  @Exclude()
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
+  @Exclude()
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 

@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, Index } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from './user.entity';
 
 @Entity('user_meta')

@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Order } from './order.entity';
 import { Product } from '../../products/entities/product.entity';
 
@@ -34,11 +35,20 @@ export class OrderItem {
   @Column('decimal', { name: 'total', precision: 20, scale: 2 })
   total: number;
 
+  @Exclude()
+
+
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
+  @Exclude()
+
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

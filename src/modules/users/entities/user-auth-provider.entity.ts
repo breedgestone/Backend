@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { OAuthProvider } from '../../../common/enums';
 import { User } from './user.entity';
 
@@ -29,6 +30,7 @@ export class UserAuthProvider {
   @Column('timestamp', { name: 'linked_at', default: () => 'CURRENT_TIMESTAMP' })
   linkedAt: Date;
 
+  @Exclude()
   @CreateDateColumn({ 
     name: 'created_at',
     type: 'timestamp',
@@ -36,6 +38,7 @@ export class UserAuthProvider {
   })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({ 
     name: 'updated_at',
     type: 'timestamp',

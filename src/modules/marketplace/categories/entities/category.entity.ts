@@ -9,7 +9,9 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { CategorySub } from './category-sub.entity';
+import { SubCategory } from './sub-category.entity';
 import { Asset } from '../../../../common/entities';
 
 @Entity('categories')
@@ -32,12 +34,15 @@ export class Category {
   @Column('tinyint', { name: 'status', default: 1 })
   status: number;
 
+  @Exclude()
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
 
+  @Exclude()
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
@@ -46,6 +51,10 @@ export class Category {
   @JoinColumn({ name: 'asset_id' })
   asset?: Asset;
 
+  @Exclude()
   @OneToMany(() => CategorySub, (categorySub) => categorySub.category)
   categorySubs: CategorySub[];
+
+  // Virtual property: Direct access to subcategories (skipping junction table)
+  subCategories?: SubCategory[];
 }

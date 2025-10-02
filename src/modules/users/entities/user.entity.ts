@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, OneToOne, OneToMany } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { UserRole, UserStatus } from '../../../common/enums';
 
 @Entity('users')
@@ -70,10 +71,12 @@ export class User {
   lastLogin?: Date;
 
   // Soft Delete
+  @Exclude()
   @Column('timestamp', { name: 'deleted_at', nullable: true })
   deletedAt?: Date;
 
   // Timestamps
+  @Exclude()
   @CreateDateColumn({ 
     name: 'created_at',
     type: 'timestamp',
@@ -81,6 +84,7 @@ export class User {
   })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({ 
     name: 'updated_at',
     type: 'timestamp',

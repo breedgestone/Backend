@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from '../../../users/entities/user.entity';
 import { ReviewableType } from '../../../../common/enums';
 
@@ -63,8 +64,13 @@ export class Review {
   is_active: boolean; // Can be deactivated by admin if inappropriate
 
   // Timestamps
+  @Exclude()
+
   @CreateDateColumn()
   created_at: Date;
+
+  @Exclude()
+
 
   @UpdateDateColumn()
   updated_at: Date;
