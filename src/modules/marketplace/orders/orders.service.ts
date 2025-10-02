@@ -5,6 +5,8 @@ import { Order, OrderItem } from './entities';
 import { CreateOrderDto, UpdateOrderDto } from './dto';
 import { ProductsService } from '../products/products.service';
 import { CartService } from '../cart/cart.service';
+import { PaymentService } from '../../payment/payment.service';
+import { PaymentType } from '../../payment/dto';
 
 @Injectable()
 export class OrdersService {
@@ -16,6 +18,7 @@ export class OrdersService {
     private productsService: ProductsService,
     @Inject(forwardRef(() => CartService))
     private cartService: CartService,
+    private readonly paymentService: PaymentService,
   ) {}
 
   private generateOrderNumber(): string {
@@ -119,5 +122,87 @@ export class OrdersService {
 
     order.status = 'cancelled';
     return await this.orderRepository.save(order);
+  }
+
+  /**
+   * Initialize payment for order
+   * Simply calls payment service - all logic handled there
+   */
+  async initializeOrderPayment(orderId: number, userId: number) {
+    const order = await this.findOrderById(orderId);
+
+    if (order.userId !== userId) {
+      throw new BadRequestException('You can only pay for your own orders');
+    }
+
+    if (order.status !== 'pending') {
+      throw new BadRequestException('Payment can only be initialized for pending orders');
+    }
+
+    if (order.paymentReference) {
+      throw new BadRequestException('Payment already initialized for this order');
+    }
+
+    // Get user details
+    const userEmail = order.user?.email || '';
+    const firstName = order.user?.firstName;
+    const lastName = order.user?.lastName;
+    const phone = order.user?.phone;
+
+    // Let payment service handle everything
+    const paymentSession = await this.paymentService.createPaymentSession({
+      paymentType: PaymentType.ORDER,
+      entityId: order.id,
+      userId: order.userId,
+      amount: order.totalAmount,
+      email: userEmail,
+      firstName,
+      lastName,
+      phone,
+      metadata: {
+        orderNumber: order.orderNumber,
+        itemsCount: order.orderItems?.length || 0,
+      },
+    });
+
+    // Store reference locally for quick lookup
+    order.paymentReference = paymentSession.reference;
+    order.paymentStatus = 'pending';
+    await this.orderRepository.save(order);
+
+    return {
+      order,
+      payment: paymentSession,
+    };
+  }
+
+  /**
+   * Check payment status and update order if paid
+   * Can be called manually or via cron job
+   */
+  async checkOrderPaymentStatus(orderId: number) {
+    const order = await this.findOrderById(orderId);
+
+    if (!order.paymentReference) {
+      throw new BadRequestException('No payment reference found for this order');
+    }
+
+    // Check payment status from payment service
+    const payment = await this.paymentService.getPaymentByReference(order.paymentReference);
+
+    // Update order status based on payment status
+    if (payment.status === 'success' && order.status === 'pending') {
+      order.paymentStatus = 'paid';
+      order.status = 'processing';
+      await this.orderRepository.save(order);
+    } else if (payment.status === 'failed') {
+      order.paymentStatus = 'failed';
+      await this.orderRepository.save(order);
+    }
+
+    return {
+      order,
+      paymentStatus: payment.status,
+    };
   }
 }

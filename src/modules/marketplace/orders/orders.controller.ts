@@ -8,8 +8,9 @@ import {
   UseGuards,
   Request,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderDto } from './dto';
 import { Order } from './entities';
@@ -75,5 +76,42 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: 'Order not found' })
   async cancelOrder(@Request() req, @Param('id', ParseIntPipe) id: number): Promise<Order> {
     return await this.ordersService.cancelOrder(req.user.id, id);
+  }
+
+  // Payment endpoints
+  @Post(':id/initialize-payment')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Initialize payment for order',
+    description: 'Generate payment link for order checkout. Works with any configured payment provider (Paystack/Flutterwave). After payment, user is redirected to /api/payment/callback which automatically updates the order status.'
+  })
+  @ApiParam({ name: 'id', description: 'Order ID' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Payment initialized successfully',
+    schema: {
+      example: {
+        order: {
+          id: 1,
+          orderNumber: 'ORD-1234567890-123',
+          status: 'pending',
+          totalAmount: 15000,
+          paymentReference: 'PAY_ORD_1_1234567890',
+          paymentStatus: 'pending'
+        },
+        payment: {
+          authorizationUrl: 'https://checkout.paystack.com/abc123',
+          reference: 'PAY_ORD_1_1234567890',
+          amount: 1500000,
+          currency: 'NGN'
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Invalid order status or payment already initialized' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async initializeOrderPayment(@Request() req, @Param('id', ParseIntPipe) id: number) {
+    return await this.ordersService.initializeOrderPayment(id, req.user.id);
   }
 }

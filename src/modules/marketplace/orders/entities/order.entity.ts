@@ -32,6 +32,9 @@ export class Order {
   @Column('varchar', { length: 255, name: 'payment_status', nullable: true })
   paymentStatus?: string;
 
+  @Column('varchar', { length: 255, name: 'payment_reference', nullable: true })
+  paymentReference?: string;
+
   @Column('varchar', { length: 255, name: 'status', default: 'pending' })
   status: string;
 
