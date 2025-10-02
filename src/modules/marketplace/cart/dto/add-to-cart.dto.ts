@@ -20,10 +20,10 @@ export class AddToCartDto {
 
   @ApiPropertyOptional({
     example: 1,
-    description: 'Product variation ID (if applicable)',
+    description: 'SubCategory ID (if applicable)',
     type: Number,
   })
   @IsOptional()
   @IsNumber()
-  variationId?: number;
+  subCategoryId?: number;
 }
