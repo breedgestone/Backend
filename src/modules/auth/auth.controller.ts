@@ -187,30 +187,4 @@ export class AuthController {
   async oauthCallback(@Req() req, @Param('provider') provider: string) {
     return this.authService.oauthLogin(req.user);
   }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ 
-    summary: 'Get authenticated user profile',
-    description: 'Retrieve current authenticated user information from JWT token.'
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User profile retrieved successfully',
-    schema: {
-      example: {
-        id: 1,
-        email: 'john@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        role: 'user',
-        status: 'active'
-      }
-    }
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
-  getProfile(@Request() req) {
-    return req.user;
-  }
 }
