@@ -5,7 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { AssetType } from '../enums';
 
 @Entity('assets')
@@ -38,12 +41,30 @@ export class Asset {
   @Column('varchar', { length: 255, name: 'alt_text', nullable: true })
   altText?: string;
 
+  @Exclude()
+
+
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
+
+  @Exclude()
+
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
+  @Exclude()
+
+
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  // Relations (optional - only loaded when needed)
+  @ManyToOne('Property', 'assets', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'property_id' })
+  property?: any;
+
+  @ManyToOne('Product', 'assets', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'product_id' })
+  product?: any;
 }
