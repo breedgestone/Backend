@@ -11,6 +11,7 @@ import { CategoriesModule } from './modules/marketplace/categories/categories.mo
 import { ProductsModule } from './modules/marketplace/products/products.module';
 import { CartModule } from './modules/marketplace/cart/cart.module';
 import { OrdersModule } from './modules/marketplace/orders/orders.module';
+import { ReviewsModule } from './modules/marketplace/reviews/reviews.module';
 import { PropertyModule } from './modules/property/property.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PaymentModule } from './modules/payment/payment.module';
@@ -31,6 +32,7 @@ import configuration from './config/configuration';
     ProductsModule,
     CartModule,
     OrdersModule,
+    ReviewsModule,
     ChatModule,
     PropertyModule,
     AdminModule,
