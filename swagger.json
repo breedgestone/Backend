@@ -1,0 +1,4797 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "description": "Create a new user account with email and password. User must login separately after registration.",
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": "Registration successful. Please login with your credentials.",
+                    "user": {
+                      "id": 1,
+                      "email": "john@example.com",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "role": "user"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or email already exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Register new user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "description": "Authenticate using email/password credentials. Returns JWT access token.",
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user": {
+                      "id": 1,
+                      "email": "john@example.com",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "role": "user"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Login with email and password",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/forgot-password": {
+      "post": {
+        "description": "Send OTP code to user email for password reset. OTP expires in 10 minutes.",
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": "Password reset OTP sent to your email"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Request password reset",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/reset-password": {
+      "post": {
+        "description": "Confirm password reset using OTP code sent to email. Sets new password.",
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": "Password reset successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired OTP"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Reset password with OTP",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "description": "Change password for authenticated user. Requires current password verification.",
+        "operationId": "AuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": "Password changed successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid current password"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT token"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Change password (authenticated)",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/oauth/{provider}": {
+      "get": {
+        "description": "Redirect user to OAuth provider (Google or Facebook) for authentication. Supports dynamic provider routing.",
+        "operationId": "AuthController_oauthAuth",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "description": "OAuth provider name",
+            "schema": {
+              "enum": [
+                "google",
+                "facebook"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to OAuth provider login page"
+          },
+          "400": {
+            "description": "Unsupported OAuth provider"
+          }
+        },
+        "summary": "Initiate OAuth login",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/oauth/{provider}/callback": {
+      "get": {
+        "description": "Handles OAuth callback from provider. Creates or links user account, returns JWT token.",
+        "operationId": "AuthController_oauthCallback",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "description": "OAuth provider name",
+            "schema": {
+              "enum": [
+                "google",
+                "facebook"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OAuth authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user": {
+                      "id": 1,
+                      "email": "john@gmail.com",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "role": "user",
+                      "linkedProviders": [
+                        "local",
+                        "google"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "OAuth authentication failed"
+          }
+        },
+        "summary": "OAuth callback endpoint",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/users/profile": {
+      "get": {
+        "description": "Retrieve full profile information for authenticated user including metadata and linked auth providers.",
+        "operationId": "UsersController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "email": "john@example.com",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "phone": "+2348012345678",
+                    "role": "user",
+                    "status": "active",
+                    "userMeta": {
+                      "gender": "male",
+                      "dateOfBirth": "1990-01-15",
+                      "city": "Lagos",
+                      "country": "Nigeria"
+                    },
+                    "authProviders": [
+                      "local",
+                      "google"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT token"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "description": "Alternative endpoint to retrieve authenticated user profile. Same as /users/profile.",
+        "operationId": "UsersController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT token"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get current user (alias)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "post": {
+        "description": "Create a new user account. This endpoint is for admin use to create users directly.",
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "email": "newuser@example.com",
+                    "firstName": "Jane",
+                    "lastName": "Smith",
+                    "role": "user",
+                    "status": "active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "409": {
+            "description": "Email already exists"
+          }
+        },
+        "summary": "Create new user (Admin)",
+        "tags": [
+          "Users"
+        ]
+      },
+      "get": {
+        "description": "Retrieve list of all users. Admin only endpoint.",
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": 1,
+                      "email": "john@example.com",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "role": "user",
+                      "status": "active"
+                    },
+                    {
+                      "id": 2,
+                      "email": "jane@example.com",
+                      "firstName": "Jane",
+                      "lastName": "Smith",
+                      "role": "agent",
+                      "status": "active"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all users (Admin)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "description": "Retrieve specific user information by user ID.",
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "email": "john@example.com",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "role": "user",
+                    "status": "active",
+                    "userMeta": {
+                      "city": "Lagos",
+                      "country": "Nigeria"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get user by ID",
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "description": "Update user information. Users can update their own profile, admins can update any user.",
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "email": "john@example.com",
+                    "firstName": "John",
+                    "lastName": "Doe Updated",
+                    "role": "user",
+                    "status": "active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Cannot update other users"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "description": "Soft delete user account. Admin only endpoint.",
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": "User deleted successfully"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete user (Admin)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/categories": {
+      "post": {
+        "operationId": "CategoriesController_createCategory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully"
+          }
+        },
+        "summary": "Create new category",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "get": {
+        "operationId": "CategoriesController_findAllCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all categories"
+          }
+        },
+        "summary": "Get all categories",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/categories/{id}": {
+      "get": {
+        "operationId": "CategoriesController_findCategoryById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns category details"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "summary": "Get category by ID",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "patch": {
+        "operationId": "CategoriesController_updateCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully"
+          }
+        },
+        "summary": "Update category",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesController_deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully"
+          }
+        },
+        "summary": "Delete category (soft delete)",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/categories/subcategories": {
+      "post": {
+        "operationId": "CategoriesController_createSubCategory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subcategory created successfully"
+          }
+        },
+        "summary": "Create new subcategory",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "get": {
+        "operationId": "CategoriesController_findAllSubCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all subcategories"
+          }
+        },
+        "summary": "Get all subcategories",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/categories/subcategories/{id}": {
+      "get": {
+        "operationId": "CategoriesController_findSubCategoryById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns subcategory details"
+          },
+          "404": {
+            "description": "Subcategory not found"
+          }
+        },
+        "summary": "Get subcategory by ID",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "patch": {
+        "operationId": "CategoriesController_updateSubCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subcategory updated successfully"
+          }
+        },
+        "summary": "Update subcategory",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesController_deleteSubCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subcategory deleted successfully"
+          }
+        },
+        "summary": "Delete subcategory (soft delete)",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/categories/{categoryId}/subcategories/{subCategoryId}": {
+      "post": {
+        "operationId": "CategoriesController_linkSubCategoryToCategory",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subCategoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subcategory linked successfully"
+          }
+        },
+        "summary": "Link subcategory to category",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/products": {
+      "post": {
+        "operationId": "ProductsController_createProduct",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product successfully created"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "SubCategory not found"
+          }
+        },
+        "summary": "Create a new product",
+        "tags": [
+          "products"
+        ]
+      },
+      "get": {
+        "operationId": "ProductsController_findAllProducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Products retrieved successfully"
+          }
+        },
+        "summary": "Get all products",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/v1/products/{id}": {
+      "get": {
+        "operationId": "ProductsController_findProductById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product retrieved successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "summary": "Get a product by ID",
+        "tags": [
+          "products"
+        ]
+      },
+      "patch": {
+        "operationId": "ProductsController_updateProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product successfully updated"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "summary": "Update a product",
+        "tags": [
+          "products"
+        ]
+      },
+      "delete": {
+        "operationId": "ProductsController_deleteProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product successfully deleted"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "summary": "Delete a product (soft delete)",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/v1/products/sub-category/{subCategoryId}": {
+      "get": {
+        "operationId": "ProductsController_findProductsBySubCategory",
+        "parameters": [
+          {
+            "name": "subCategoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products retrieved successfully"
+          }
+        },
+        "summary": "Get all products by subcategory",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/v1/cart": {
+      "get": {
+        "operationId": "CartController_getCart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Cart retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user cart",
+        "tags": [
+          "cart"
+        ]
+      },
+      "delete": {
+        "operationId": "CartController_clearCart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Cart cleared successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Clear cart",
+        "tags": [
+          "cart"
+        ]
+      }
+    },
+    "/api/v1/cart/add": {
+      "post": {
+        "operationId": "CartController_addToCart",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToCartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product added to cart successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add product to cart",
+        "tags": [
+          "cart"
+        ]
+      }
+    },
+    "/api/v1/cart/item/{productId}": {
+      "patch": {
+        "operationId": "CartController_updateCartItem",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCartItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart item updated successfully"
+          },
+          "404": {
+            "description": "Product not found in cart"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update cart item quantity",
+        "tags": [
+          "cart"
+        ]
+      },
+      "delete": {
+        "operationId": "CartController_removeFromCart",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product removed from cart successfully"
+          },
+          "404": {
+            "description": "Product not found in cart"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove product from cart",
+        "tags": [
+          "cart"
+        ]
+      }
+    },
+    "/api/v1/cart/checkout": {
+      "post": {
+        "operationId": "CartController_checkout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully from cart"
+          },
+          "400": {
+            "description": "Cart is empty or invalid data"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Checkout and create order from cart",
+        "tags": [
+          "cart"
+        ]
+      }
+    },
+    "/api/v1/orders": {
+      "post": {
+        "operationId": "OrdersController_createOrder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order successfully created"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new order",
+        "tags": [
+          "orders"
+        ]
+      },
+      "get": {
+        "operationId": "OrdersController_findAllOrders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Orders retrieved successfully"
+          }
+        },
+        "summary": "Get all orders (admin)",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/orders/my-orders": {
+      "get": {
+        "operationId": "OrdersController_findUserOrders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User orders retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user orders",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "operationId": "OrdersController_findOrderById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order retrieved successfully"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "summary": "Get order by ID",
+        "tags": [
+          "orders"
+        ]
+      },
+      "patch": {
+        "operationId": "OrdersController_updateOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order successfully updated"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "summary": "Update order status (admin)",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{id}/cancel": {
+      "patch": {
+        "operationId": "OrdersController_cancelOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order successfully cancelled"
+          },
+          "400": {
+            "description": "Cannot cancel this order"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel order (user can only cancel own pending orders)",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{id}/initialize-payment": {
+      "post": {
+        "description": "Generate payment link for order checkout. Works with any configured payment provider (Paystack/Flutterwave). After payment, user is redirected to /api/payment/callback which automatically updates the order status.",
+        "operationId": "OrdersController_initializeOrderPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Order ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment initialized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "order": {
+                      "id": 1,
+                      "orderNumber": "ORD-1234567890-123",
+                      "status": "pending",
+                      "totalAmount": 15000,
+                      "paymentReference": "PAY_ORD_1_1234567890",
+                      "paymentStatus": "pending"
+                    },
+                    "payment": {
+                      "authorizationUrl": "https://checkout.paystack.com/abc123",
+                      "reference": "PAY_ORD_1_1234567890",
+                      "amount": 1500000,
+                      "currency": "NGN"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid order status or payment already initialized"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Initialize payment for order",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/payment/initialize": {
+      "post": {
+        "operationId": "PaymentController_initializePayment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitializePaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment initialized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "authorizationUrl": "https://checkout.paystack.com/xyz",
+                      "accessCode": "xyz123",
+                      "reference": "PAY_1234567890_ABC"
+                    },
+                    "message": "Payment initialized successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid payment data"
+          },
+          "401": {
+            "description": "Unauthorized - authentication required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Initialize a payment transaction",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/v1/payment/verify/{reference}": {
+      "get": {
+        "operationId": "PaymentController_verifyPayment",
+        "parameters": [
+          {
+            "name": "reference",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "success": true,
+                      "reference": "PAY_1234567890_ABC",
+                      "amount": 500,
+                      "currency": "NGN",
+                      "status": "success",
+                      "paidAt": "2024-01-15T10:30:00.000Z",
+                      "customer": {
+                        "email": "customer@example.com",
+                        "firstName": "John",
+                        "lastName": "Doe"
+                      },
+                      "metadata": {
+                        "orderId": 123
+                      }
+                    },
+                    "message": "Payment verified successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid reference or verification failed"
+          },
+          "401": {
+            "description": "Unauthorized - authentication required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verify a payment transaction",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/v1/payment/refund": {
+      "post": {
+        "operationId": "PaymentController_refundPayment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundPaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "success": true,
+                      "reference": "PAY_1234567890_ABC",
+                      "refundedAmount": 250,
+                      "message": "Refund processed successfully"
+                    },
+                    "message": "Refund processed successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid refund data"
+          },
+          "401": {
+            "description": "Unauthorized - authentication required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Process a payment refund",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/v1/payment/details/{reference}": {
+      "get": {
+        "operationId": "PaymentController_getPaymentDetails",
+        "parameters": [
+          {
+            "name": "reference",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment details retrieved successfully"
+          },
+          "400": {
+            "description": "Bad request - invalid reference"
+          },
+          "401": {
+            "description": "Unauthorized - authentication required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get payment transaction details",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/v1/payment/provider": {
+      "get": {
+        "operationId": "PaymentController_getProvider",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Payment provider retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "provider": "paystack"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get current payment provider name",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/v1/payment/callback": {
+      "get": {
+        "description": "Single webhook endpoint for all payments (inspections, consultations, orders, etc.). Payment provider redirects here after user completes payment. Automatically verifies and stores result.",
+        "operationId": "PaymentController_paymentCallback",
+        "parameters": [
+          {
+            "name": "reference",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "reference": "PAY_INSP_123_1234567890",
+                    "entityId": 123,
+                    "entityType": "inspection",
+                    "amount": 500000,
+                    "status": "success",
+                    "message": "Payment verified successfully. Your inspection has been scheduled.",
+                    "redirectUrl": "/appointments/inspections/123"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payment verification failed"
+          },
+          "404": {
+            "description": "Payment transaction not found"
+          }
+        },
+        "summary": "Unified payment callback for ALL payment types",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/v1/payment/transaction/{reference}": {
+      "get": {
+        "operationId": "PaymentController_getTransaction",
+        "parameters": [
+          {
+            "name": "reference",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get payment transaction details",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/v1/reviews": {
+      "post": {
+        "operationId": "ReviewsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created successfully"
+          },
+          "400": {
+            "description": "Bad request - Invalid data or duplicate review"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new review",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/product/{id}": {
+      "get": {
+        "operationId": "ReviewsController_getProductReviews",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of product reviews"
+          }
+        },
+        "summary": "Get all reviews for a product",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/property/{id}": {
+      "get": {
+        "operationId": "ReviewsController_getPropertyReviews",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Property ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of property reviews"
+          }
+        },
+        "summary": "Get all reviews for a property",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/agent/{id}": {
+      "get": {
+        "operationId": "ReviewsController_getAgentReviews",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Agent/User ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of agent reviews"
+          }
+        },
+        "summary": "Get all reviews for an agent",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/product/{id}/stats": {
+      "get": {
+        "operationId": "ReviewsController_getProductStats",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product rating statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "averageRating": 4.5,
+                    "totalReviews": 10,
+                    "distribution": [
+                      {
+                        "rating": 5,
+                        "count": 6
+                      },
+                      {
+                        "rating": 4,
+                        "count": 3
+                      },
+                      {
+                        "rating": 3,
+                        "count": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get rating statistics for a product",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/property/{id}/stats": {
+      "get": {
+        "operationId": "ReviewsController_getPropertyStats",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Property ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property rating statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "averageRating": 4.2,
+                    "totalReviews": 8,
+                    "distribution": [
+                      {
+                        "rating": 5,
+                        "count": 4
+                      },
+                      {
+                        "rating": 4,
+                        "count": 3
+                      },
+                      {
+                        "rating": 3,
+                        "count": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get rating statistics for a property",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/agent/{id}/stats": {
+      "get": {
+        "operationId": "ReviewsController_getAgentStats",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Agent/User ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent rating statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "averageRating": 4.8,
+                    "totalReviews": 15,
+                    "distribution": [
+                      {
+                        "rating": 5,
+                        "count": 12
+                      },
+                      {
+                        "rating": 4,
+                        "count": 2
+                      },
+                      {
+                        "rating": 3,
+                        "count": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get rating statistics for an agent",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/my-reviews": {
+      "get": {
+        "operationId": "ReviewsController_getMyReviews",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of user reviews"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all reviews created by the current user",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/{id}": {
+      "get": {
+        "operationId": "ReviewsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Review ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review details"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "summary": "Get a specific review by ID",
+        "tags": [
+          "Reviews"
+        ]
+      },
+      "patch": {
+        "operationId": "ReviewsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Review ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Not your review"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a review (own review only)",
+        "tags": [
+          "Reviews"
+        ]
+      },
+      "delete": {
+        "operationId": "ReviewsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Review ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Review deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Not your review"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a review (own review only)",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/chat": {
+      "post": {
+        "operationId": "ChatController_createChat",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChatDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Chat created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new chat with another user",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/{id}/message": {
+      "post": {
+        "operationId": "ChatController_sendMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Message sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a message in a chat",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/my-chats": {
+      "get": {
+        "operationId": "ChatController_getMyChats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Chats retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Chat"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all chats for the authenticated user",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/{id}": {
+      "get": {
+        "operationId": "ChatController_getChat",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a specific chat by ID",
+        "tags": [
+          "chat"
+        ]
+      },
+      "patch": {
+        "operationId": "ChatController_updateChat",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChatDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update chat status",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/{id}/messages": {
+      "get": {
+        "operationId": "ChatController_getChatMessages",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Messages retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all messages in a chat",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/{id}/mark-read": {
+      "post": {
+        "operationId": "ChatController_markAsRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Messages marked as read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark all messages in a chat as read",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/{id}/close": {
+      "post": {
+        "operationId": "ChatController_closeChat",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat closed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Close a chat",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/property": {
+      "post": {
+        "operationId": "PropertyController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePropertyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Property created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Agent role required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new property (Agent only)",
+        "tags": [
+          "property"
+        ]
+      },
+      "get": {
+        "operationId": "PropertyController_findAll",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "draft",
+                "pending_approval",
+                "approved",
+                "rejected",
+                "inactive"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minPrice",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Properties retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Property"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all properties with optional filters",
+        "tags": [
+          "property"
+        ]
+      }
+    },
+    "/api/v1/property/approved": {
+      "get": {
+        "operationId": "PropertyController_findApproved",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Approved properties retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Property"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all approved properties (public)",
+        "tags": [
+          "property"
+        ]
+      }
+    },
+    "/api/v1/property/my-properties": {
+      "get": {
+        "operationId": "PropertyController_findMyProperties",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Agent properties retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Property"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all properties of the authenticated agent",
+        "tags": [
+          "property"
+        ]
+      }
+    },
+    "/api/v1/property/{id}": {
+      "get": {
+        "operationId": "PropertyController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a specific property by ID",
+        "tags": [
+          "property"
+        ]
+      },
+      "patch": {
+        "operationId": "PropertyController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePropertyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Property updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a property (Agent - own properties only)",
+        "tags": [
+          "property"
+        ]
+      },
+      "delete": {
+        "operationId": "PropertyController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property deleted successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a property (Agent - own properties only)",
+        "tags": [
+          "property"
+        ]
+      }
+    },
+    "/api/v1/property/{id}/submit": {
+      "post": {
+        "operationId": "PropertyController_submitForApproval",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property submitted for approval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit property for approval (Agent)",
+        "tags": [
+          "property"
+        ]
+      }
+    },
+    "/api/v1/admin/agent": {
+      "post": {
+        "operationId": "AdminController_createAgent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Agent account created successfully"
+          },
+          "400": {
+            "description": "Bad request - invalid data"
+          },
+          "401": {
+            "description": "Unauthorized - admin access required"
+          },
+          "409": {
+            "description": "Conflict - user with email already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new agent account",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v1/admin/property/{id}/review": {
+      "post": {
+        "operationId": "AdminController_reviewProperty",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovePropertyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Property reviewed successfully"
+          },
+          "400": {
+            "description": "Bad request - invalid status or missing rejection note"
+          },
+          "401": {
+            "description": "Unauthorized - admin access required"
+          },
+          "404": {
+            "description": "Property not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Review a property (approve or reject)",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v1/admin/property/{id}/feature": {
+      "post": {
+        "operationId": "AdminController_featureProperty",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property marked as featured successfully"
+          },
+          "400": {
+            "description": "Bad request - only approved properties can be featured"
+          },
+          "401": {
+            "description": "Unauthorized - admin access required"
+          },
+          "404": {
+            "description": "Property not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a property as featured",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v1/admin/property/{id}/unfeature": {
+      "post": {
+        "operationId": "AdminController_unfeatureProperty",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property unfeatured successfully"
+          },
+          "401": {
+            "description": "Unauthorized - admin access required"
+          },
+          "404": {
+            "description": "Property not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove featured status from a property",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v1/admin/property/pending": {
+      "get": {
+        "operationId": "AdminController_getPendingProperties",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of pending properties retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all properties pending approval",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v1/admin/property/history": {
+      "get": {
+        "operationId": "AdminController_getPropertyHistory",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "adminId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property review history retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get property review history",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v1/admin/property/stats": {
+      "get": {
+        "operationId": "AdminController_getPropertyStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Property statistics retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - admin access required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get property statistics for admin dashboard",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/v1/appointments/inspections": {
+      "post": {
+        "operationId": "AppointmentsController_createInspection",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInspectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inspection created successfully"
+          },
+          "404": {
+            "description": "Property not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create property inspection request",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "get": {
+        "operationId": "AppointmentsController_findAllInspections",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by appointment status",
+            "schema": {
+              "enum": [
+                "pending",
+                "scheduled",
+                "confirmed",
+                "completed",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "agentId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by agent ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of inspections"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all inspections",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/api/v1/appointments/inspections/{id}": {
+      "get": {
+        "operationId": "AppointmentsController_findOneInspection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Inspection ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection details"
+          },
+          "404": {
+            "description": "Inspection not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get single inspection by ID",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "patch": {
+        "operationId": "AppointmentsController_updateInspection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Inspection ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inspection updated successfully"
+          },
+          "404": {
+            "description": "Inspection not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update inspection status or details",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "delete": {
+        "operationId": "AppointmentsController_deleteInspection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Inspection ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection deleted successfully"
+          },
+          "404": {
+            "description": "Inspection not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete inspection",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/api/v1/appointments/consultations": {
+      "post": {
+        "operationId": "AppointmentsController_createConsultation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConsultationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Consultation created successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create consultation request",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "get": {
+        "operationId": "AppointmentsController_findAllConsultations",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by appointment status",
+            "schema": {
+              "enum": [
+                "pending",
+                "scheduled",
+                "confirmed",
+                "completed",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of consultations"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all consultations",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/api/v1/appointments/consultations/{id}": {
+      "get": {
+        "operationId": "AppointmentsController_findOneConsultation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Consultation ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation details"
+          },
+          "404": {
+            "description": "Consultation not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get single consultation by ID",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "patch": {
+        "operationId": "AppointmentsController_updateConsultation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Consultation ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consultation updated successfully"
+          },
+          "404": {
+            "description": "Consultation not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update consultation status or details",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "delete": {
+        "operationId": "AppointmentsController_deleteConsultation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Consultation ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation deleted successfully"
+          },
+          "404": {
+            "description": "Consultation not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete consultation",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/api/v1/appointments/inspections/{id}/initialize-payment": {
+      "post": {
+        "description": "Generate payment link for inspection appointment. Works with any configured payment provider (Paystack/Flutterwave).",
+        "operationId": "AppointmentsController_initializeInspectionPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Inspection ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment initialized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "inspection": {
+                      "id": 1,
+                      "status": "pending",
+                      "amount": 5000,
+                      "paymentReference": "INSP_1_1234567890"
+                    },
+                    "payment": {
+                      "authorizationUrl": "https://checkout.paystack.com/abc123",
+                      "reference": "INSP_1_1234567890"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid inspection status or amount"
+          },
+          "404": {
+            "description": "Inspection not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Initialize payment for inspection",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/api/v1/appointments/consultations/{id}/initialize-payment": {
+      "post": {
+        "description": "Generate payment link for consultation appointment. Works with any configured payment provider (Paystack/Flutterwave). After payment, user is redirected to /api/payment/callback which automatically updates the consultation status.",
+        "operationId": "AppointmentsController_initializeConsultationPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Consultation ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment initialized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "consultation": {
+                      "id": 1,
+                      "status": "pending",
+                      "amount": 3000,
+                      "paymentReference": "PAY_CONS_1_1234567890"
+                    },
+                    "payment": {
+                      "authorizationUrl": "https://checkout.paystack.com/abc123",
+                      "reference": "PAY_CONS_1_1234567890",
+                      "amount": 300000,
+                      "currency": "NGN"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid consultation status or amount"
+          },
+          "404": {
+            "description": "Consultation not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Initialize payment for consultation",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Breedgestone API",
+    "description": "Breedgestone Property Management & Marketplace API Documentation",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints (Login, Register, OAuth, Password Reset)"
+    },
+    {
+      "name": "Users",
+      "description": "User management endpoints"
+    },
+    {
+      "name": "Notifications",
+      "description": "Notification management endpoints"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Development"
+    },
+    {
+      "url": "https://staging.breedgestone.com",
+      "description": "Staging Server"
+    },
+    {
+      "url": "https://api.breedgestone.com",
+      "description": "Production Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "accessToken": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "Authorization",
+        "description": "Enter JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "John",
+            "description": "User first name",
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe",
+            "description": "User last name",
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "description": "User email address"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123!",
+            "description": "User password (min 8 characters, must contain uppercase, lowercase, and number/special character)",
+            "minLength": 8
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678",
+            "description": "User phone number (international format)"
+          },
+          "profilePicture": {
+            "type": "string",
+            "example": "https://example.com/profile.jpg",
+            "description": "Profile picture URL",
+            "maxLength": 500
+          },
+          "gender": {
+            "type": "string",
+            "example": "male",
+            "description": "User gender"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "example": "1990-01-15",
+            "description": "Date of birth (ISO 8601 format)"
+          },
+          "bio": {
+            "type": "string",
+            "example": "Software developer passionate about technology",
+            "description": "User biography",
+            "maxLength": 1000
+          },
+          "role": {
+            "type": "string",
+            "example": "user",
+            "description": "User role",
+            "enum": [
+              "admin",
+              "agent",
+              "user"
+            ],
+            "default": "user"
+          },
+          "address": {
+            "type": "string",
+            "example": "123 Main Street",
+            "description": "Street address",
+            "maxLength": 255
+          },
+          "city": {
+            "type": "string",
+            "example": "Lagos",
+            "description": "City",
+            "maxLength": 100
+          },
+          "state": {
+            "type": "string",
+            "example": "Lagos State",
+            "description": "State/Province",
+            "maxLength": 100
+          },
+          "country": {
+            "type": "string",
+            "example": "Nigeria",
+            "description": "Country",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "password"
+        ]
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "description": "User email address"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123!",
+            "description": "User password",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "description": "Email address to send password reset link"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "description": "User email address"
+          },
+          "otp": {
+            "type": "string",
+            "example": "123456",
+            "description": "OTP code sent to email"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewPassword123!",
+            "description": "New password (min 8 characters)",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "otp",
+          "newPassword"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "example": "OldPassword123!",
+            "description": "Current password"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewPassword123!",
+            "description": "New password (min 8 characters)",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "active",
+            "description": "User account status (admin only)",
+            "enum": [
+              "active",
+              "inactive",
+              "suspended",
+              "pending_verification",
+              "banned"
+            ]
+          },
+          "licenseNumber": {
+            "type": "string",
+            "example": "LIC12345",
+            "description": "Professional license number",
+            "maxLength": 100
+          },
+          "licenseExpiry": {
+            "type": "string",
+            "example": "2025-12-31",
+            "description": "License expiry date"
+          },
+          "specializations": {
+            "example": [
+              "Real Estate",
+              "Property Management"
+            ],
+            "description": "Areas of specialization",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "yearsOfExperience": {
+            "type": "number",
+            "example": 5,
+            "description": "Years of professional experience",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "isVendor": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether user is a vendor"
+          },
+          "vendorDescription": {
+            "type": "string",
+            "example": "We provide high-quality construction materials",
+            "description": "Vendor business description",
+            "maxLength": 2000
+          },
+          "fcmToken": {
+            "type": "string",
+            "example": "fcm_token_here",
+            "description": "Firebase Cloud Messaging token for push notifications"
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Building Materials",
+            "description": "Category name"
+          },
+          "slug": {
+            "type": "string",
+            "example": "building-materials",
+            "description": "URL-friendly category slug"
+          },
+          "description": {
+            "type": "string",
+            "example": "All types of building and construction materials",
+            "description": "Category description"
+          },
+          "imageId": {
+            "type": "string",
+            "example": "cat_img_123",
+            "description": "Category image ID"
+          },
+          "status": {
+            "type": "number",
+            "example": 1,
+            "description": "Category status (1=active, 0=inactive)"
+          }
+        },
+        "required": [
+          "name",
+          "slug"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Building Materials",
+            "description": "Category name"
+          },
+          "slug": {
+            "type": "string",
+            "example": "building-materials",
+            "description": "URL-friendly category slug"
+          },
+          "description": {
+            "type": "string",
+            "example": "All types of building and construction materials",
+            "description": "Category description"
+          },
+          "imageId": {
+            "type": "string",
+            "example": "cat_img_123",
+            "description": "Category image ID"
+          },
+          "status": {
+            "type": "number",
+            "example": 1,
+            "description": "Category status (1=active, 0=inactive)"
+          }
+        }
+      },
+      "CreateSubCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Cement",
+            "description": "Sub-category name"
+          },
+          "slug": {
+            "type": "string",
+            "example": "cement",
+            "description": "URL-friendly sub-category slug"
+          },
+          "description": {
+            "type": "string",
+            "example": "Various types of cement for construction",
+            "description": "Sub-category description"
+          },
+          "price": {
+            "type": "number",
+            "example": 5500,
+            "description": "Base price for sub-category"
+          },
+          "priceUnit": {
+            "type": "string",
+            "example": "per bag",
+            "description": "Price unit"
+          },
+          "imageId": {
+            "type": "string",
+            "example": "subcat_img_123",
+            "description": "Sub-category image ID"
+          },
+          "status": {
+            "type": "number",
+            "example": 1,
+            "description": "Sub-category status (1=active, 0=inactive)"
+          }
+        },
+        "required": [
+          "name",
+          "slug"
+        ]
+      },
+      "UpdateSubCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Cement",
+            "description": "Sub-category name"
+          },
+          "slug": {
+            "type": "string",
+            "example": "cement",
+            "description": "URL-friendly sub-category slug"
+          },
+          "description": {
+            "type": "string",
+            "example": "Various types of cement for construction",
+            "description": "Sub-category description"
+          },
+          "price": {
+            "type": "number",
+            "example": 5500,
+            "description": "Base price for sub-category"
+          },
+          "priceUnit": {
+            "type": "string",
+            "example": "per bag",
+            "description": "Price unit"
+          },
+          "imageId": {
+            "type": "string",
+            "example": "subcat_img_123",
+            "description": "Sub-category image ID"
+          },
+          "status": {
+            "type": "number",
+            "example": 1,
+            "description": "Sub-category status (1=active, 0=inactive)"
+          }
+        }
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "subCategoryId": {
+            "type": "number",
+            "example": 1,
+            "description": "Sub-category ID"
+          },
+          "name": {
+            "type": "string",
+            "example": "Premium Cement",
+            "description": "Product name"
+          },
+          "description": {
+            "type": "string",
+            "example": "High-quality cement for construction projects",
+            "description": "Product description"
+          },
+          "price": {
+            "type": "number",
+            "example": 5500,
+            "description": "Product price"
+          },
+          "priceUnit": {
+            "type": "string",
+            "example": "per bag",
+            "description": "Price unit (e.g., per bag, per ton)"
+          },
+          "imageId": {
+            "type": "string",
+            "example": "img_123456",
+            "description": "Product image ID"
+          },
+          "status": {
+            "type": "number",
+            "example": 1,
+            "description": "Product status (1=active, 0=inactive)"
+          }
+        },
+        "required": [
+          "subCategoryId",
+          "name",
+          "description"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "subCategoryId": {
+            "type": "number",
+            "example": 1,
+            "description": "Sub-category ID"
+          },
+          "name": {
+            "type": "string",
+            "example": "Premium Cement",
+            "description": "Product name"
+          },
+          "description": {
+            "type": "string",
+            "example": "High-quality cement for construction projects",
+            "description": "Product description"
+          },
+          "price": {
+            "type": "number",
+            "example": 5500,
+            "description": "Product price"
+          },
+          "priceUnit": {
+            "type": "string",
+            "example": "per bag",
+            "description": "Price unit (e.g., per bag, per ton)"
+          },
+          "imageId": {
+            "type": "string",
+            "example": "img_123456",
+            "description": "Product image ID"
+          },
+          "status": {
+            "type": "number",
+            "example": 1,
+            "description": "Product status (1=active, 0=inactive)"
+          }
+        }
+      },
+      "AddToCartDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "number",
+            "example": 1,
+            "description": "Product ID to add to cart"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2,
+            "description": "Quantity of product"
+          },
+          "subCategoryId": {
+            "type": "number",
+            "example": 1,
+            "description": "SubCategory ID (if applicable)"
+          }
+        },
+        "required": [
+          "productId",
+          "quantity"
+        ]
+      },
+      "UpdateCartItemDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "example": 3,
+            "description": "New quantity for cart item"
+          }
+        },
+        "required": [
+          "quantity"
+        ]
+      },
+      "CheckoutDto": {
+        "type": "object",
+        "properties": {
+          "deliveryAddress": {
+            "type": "string",
+            "example": "123 Main Street, Lagos, Nigeria",
+            "description": "Delivery address for the order"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "example": "card",
+            "description": "Payment method (card, bank_transfer, cash_on_delivery)"
+          },
+          "deliveryFee": {
+            "type": "number",
+            "example": 1500,
+            "description": "Delivery fee amount"
+          },
+          "tax": {
+            "type": "number",
+            "example": 750,
+            "description": "Tax amount"
+          },
+          "note": {
+            "type": "string",
+            "example": "Please deliver before 5pm",
+            "description": "Additional notes for the order"
+          }
+        },
+        "required": [
+          "deliveryAddress"
+        ]
+      },
+      "OrderItemDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "number",
+            "example": 1,
+            "description": "Product ID"
+          },
+          "variationId": {
+            "type": "number",
+            "example": 1,
+            "description": "Product variation ID (if applicable)"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2,
+            "description": "Quantity to order"
+          },
+          "price": {
+            "type": "number",
+            "example": 5500,
+            "description": "Price per unit"
+          }
+        },
+        "required": [
+          "productId",
+          "quantity",
+          "price"
+        ]
+      },
+      "CreateOrderDto": {
+        "type": "object",
+        "properties": {
+          "deliveryAddress": {
+            "type": "string",
+            "example": "123 Main Street, Lagos, Nigeria",
+            "description": "Delivery address"
+          },
+          "items": {
+            "example": [
+              {
+                "productId": 1,
+                "quantity": 2,
+                "price": 5500
+              }
+            ],
+            "description": "Order items",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemDto"
+            }
+          },
+          "paymentMethod": {
+            "type": "string",
+            "example": "card",
+            "description": "Payment method (card, bank_transfer, cash_on_delivery)"
+          },
+          "deliveryFee": {
+            "type": "number",
+            "example": 1500,
+            "description": "Delivery fee amount"
+          },
+          "tax": {
+            "type": "number",
+            "example": 750,
+            "description": "Tax amount"
+          },
+          "note": {
+            "type": "string",
+            "example": "Please deliver between 9AM-5PM",
+            "description": "Order notes"
+          }
+        },
+        "required": [
+          "deliveryAddress",
+          "items"
+        ]
+      },
+      "UpdateOrderDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "InitializePaymentDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Customer email address",
+            "example": "customer@example.com"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount to charge in smallest currency unit (kobo for NGN, cents for USD)",
+            "example": 50000,
+            "minimum": 100
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "example": "NGN",
+            "default": "NGN"
+          },
+          "reference": {
+            "type": "string",
+            "description": "Unique payment reference",
+            "example": "PAY_1234567890_ABC"
+          },
+          "callbackUrl": {
+            "type": "string",
+            "description": "Callback URL for payment redirect",
+            "example": "https://yoursite.com/payment/callback"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata",
+            "example": {
+              "orderId": 123,
+              "userId": 456
+            }
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Customer first name",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Customer last name",
+            "example": "Doe"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Customer phone number",
+            "example": "+2348012345678"
+          }
+        },
+        "required": [
+          "email",
+          "amount"
+        ]
+      },
+      "RefundPaymentDto": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "description": "Payment reference to refund",
+            "example": "PAY_1234567890_ABC"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount to refund in smallest currency unit (optional for partial refund)",
+            "example": 25000,
+            "minimum": 100
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for refund",
+            "example": "Customer requested refund"
+          }
+        },
+        "required": [
+          "reference"
+        ]
+      },
+      "CreateReviewDto": {
+        "type": "object",
+        "properties": {
+          "reviewable_type": {
+            "type": "string",
+            "description": "Type of entity being reviewed",
+            "enum": [
+              "product",
+              "property",
+              "agent"
+            ],
+            "example": "product"
+          },
+          "reviewable_id": {
+            "type": "number",
+            "description": "ID of the entity being reviewed",
+            "example": 1
+          },
+          "rating": {
+            "type": "number",
+            "description": "Rating from 1 to 5 stars",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comment": {
+            "type": "string",
+            "description": "Review comment/feedback",
+            "example": "Great product! Highly recommended."
+          }
+        },
+        "required": [
+          "reviewable_type",
+          "reviewable_id",
+          "rating"
+        ]
+      },
+      "UpdateReviewDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "description": "Updated rating from 1 to 5 stars",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 4
+          },
+          "comment": {
+            "type": "string",
+            "description": "Updated review comment/feedback",
+            "example": "Updated review comment."
+          }
+        }
+      },
+      "CreateChatDto": {
+        "type": "object",
+        "properties": {
+          "recipientId": {
+            "type": "number",
+            "example": 2,
+            "description": "The user ID to start chat with"
+          },
+          "subject": {
+            "type": "string",
+            "example": "Product inquiry",
+            "description": "Optional chat subject"
+          }
+        },
+        "required": [
+          "recipientId"
+        ]
+      },
+      "Chat": {
+        "type": "object",
+        "properties": {}
+      },
+      "ChatMessage": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateChatDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "closed",
+            "description": "Chat status",
+            "enum": [
+              "active",
+              "closed"
+            ]
+          }
+        }
+      },
+      "CreatePropertyDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Property title",
+            "example": "Luxury 3 Bedroom Apartment in Lekki"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed property description",
+            "example": "Beautiful modern apartment with sea view, fully furnished with premium appliances"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of property",
+            "example": "apartment",
+            "enum": [
+              "house",
+              "apartment",
+              "land",
+              "commercial",
+              "office"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "description": "Property price in Naira",
+            "example": 45000000
+          },
+          "address": {
+            "type": "string",
+            "description": "Full address of the property",
+            "example": "15 Admiralty Way, Lekki Phase 1"
+          },
+          "city": {
+            "type": "string",
+            "description": "City",
+            "example": "Lagos"
+          },
+          "state": {
+            "type": "string",
+            "description": "State",
+            "example": "Lagos"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country",
+            "example": "Nigeria",
+            "default": "Nigeria"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude coordinate",
+            "example": 6.4474
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude coordinate",
+            "example": 3.4702
+          },
+          "bedrooms": {
+            "type": "number",
+            "description": "Number of bedrooms",
+            "example": 3
+          },
+          "bathrooms": {
+            "type": "number",
+            "description": "Number of bathrooms",
+            "example": 2
+          },
+          "areaSqm": {
+            "type": "number",
+            "description": "Area in square meters",
+            "example": 150.5
+          },
+          "propertySize": {
+            "type": "string",
+            "description": "Property size category",
+            "example": "medium",
+            "enum": [
+              "small",
+              "medium",
+              "large",
+              "extra_large"
+            ]
+          },
+          "furnishing": {
+            "type": "string",
+            "description": "Furnishing type",
+            "example": "furnished",
+            "enum": [
+              "furnished",
+              "semi_furnished",
+              "unfurnished"
+            ]
+          },
+          "amenities": {
+            "description": "Array of amenities",
+            "example": [
+              "Swimming Pool",
+              "Gym",
+              "Security",
+              "24/7 Power"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "type",
+          "price",
+          "address",
+          "city",
+          "state"
+        ]
+      },
+      "Property": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdatePropertyDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Property title",
+            "example": "Luxury 3 Bedroom Apartment in Lekki"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed property description",
+            "example": "Beautiful modern apartment with sea view, fully furnished with premium appliances"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of property",
+            "example": "apartment",
+            "enum": [
+              "house",
+              "apartment",
+              "land",
+              "commercial",
+              "office"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "description": "Property price in Naira",
+            "example": 45000000
+          },
+          "address": {
+            "type": "string",
+            "description": "Full address of the property",
+            "example": "15 Admiralty Way, Lekki Phase 1"
+          },
+          "city": {
+            "type": "string",
+            "description": "City",
+            "example": "Lagos"
+          },
+          "state": {
+            "type": "string",
+            "description": "State",
+            "example": "Lagos"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country",
+            "example": "Nigeria",
+            "default": "Nigeria"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude coordinate",
+            "example": 6.4474
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude coordinate",
+            "example": 3.4702
+          },
+          "bedrooms": {
+            "type": "number",
+            "description": "Number of bedrooms",
+            "example": 3
+          },
+          "bathrooms": {
+            "type": "number",
+            "description": "Number of bathrooms",
+            "example": 2
+          },
+          "areaSqm": {
+            "type": "number",
+            "description": "Area in square meters",
+            "example": 150.5
+          },
+          "propertySize": {
+            "type": "string",
+            "description": "Property size category",
+            "example": "medium",
+            "enum": [
+              "small",
+              "medium",
+              "large",
+              "extra_large"
+            ]
+          },
+          "furnishing": {
+            "type": "string",
+            "description": "Furnishing type",
+            "example": "furnished",
+            "enum": [
+              "furnished",
+              "semi_furnished",
+              "unfurnished"
+            ]
+          },
+          "amenities": {
+            "description": "Array of amenities",
+            "example": [
+              "Swimming Pool",
+              "Gym",
+              "Security",
+              "24/7 Power"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateAgentDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "Agent first name",
+            "example": "John",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Agent last name",
+            "example": "Doe",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "description": "Agent email address",
+            "example": "agent@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Agent phone number (optional)",
+            "example": "+2348012345678"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
+      "ApprovePropertyDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Action to take on the property",
+            "example": "approve",
+            "enum": [
+              "approve",
+              "reject"
+            ]
+          },
+          "rejectionReason": {
+            "type": "string",
+            "description": "Reason for rejection (required if action is reject)",
+            "example": "Property does not meet our quality standards"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "CreateInspectionDto": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "number",
+            "description": "Property ID to inspect",
+            "example": 1
+          },
+          "firstName": {
+            "type": "string",
+            "description": "First name",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "example": "john.doe@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number",
+            "example": "+2348012345678"
+          },
+          "preferredDateTime": {
+            "type": "string",
+            "description": "Preferred inspection date and time",
+            "example": "2025-10-15T10:00:00Z"
+          },
+          "message": {
+            "type": "string",
+            "description": "Additional message or special requests",
+            "example": "Please call before arrival"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Inspection fee amount",
+            "example": 30000
+          }
+        },
+        "required": [
+          "propertyId",
+          "firstName",
+          "lastName",
+          "email",
+          "phone",
+          "preferredDateTime",
+          "amount"
+        ]
+      },
+      "UpdateAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "scheduled",
+              "confirmed",
+              "completed",
+              "cancelled"
+            ],
+            "description": "Appointment status",
+            "example": "confirmed"
+          },
+          "scheduledAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Scheduled appointment time",
+            "example": "2025-10-15T10:00:00Z"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Confirmation timestamp",
+            "example": "2025-10-14T09:00:00Z"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Completion timestamp",
+            "example": "2025-10-15T12:00:00Z"
+          },
+          "cancelledAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Cancellation timestamp",
+            "example": "2025-10-14T15:00:00Z"
+          },
+          "cancellationReason": {
+            "type": "string",
+            "description": "Reason for cancellation",
+            "example": "Client requested rescheduling"
+          }
+        }
+      },
+      "CreateConsultationDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "example": "john.doe@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number",
+            "example": "+2348012345678"
+          },
+          "preferredDateTime": {
+            "type": "string",
+            "description": "Preferred consultation date and time",
+            "example": "2025-10-15T14:00:00Z"
+          },
+          "message": {
+            "type": "string",
+            "description": "Consultation topic or questions",
+            "example": "Need advice on property investment"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Consultation fee amount",
+            "example": 50000
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "phone",
+          "preferredDateTime",
+          "amount"
+        ]
+      }
+    }
+  }
+}
