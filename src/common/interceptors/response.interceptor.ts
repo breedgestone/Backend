@@ -2,6 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Response } from 'express';
+import { classToPlain } from 'class-transformer';
 import { ApiResponse } from '../interfaces';
 
 @Injectable()
@@ -13,19 +14,22 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
 
     return next.handle().pipe(
       map((data) => {
+        // Serialize data to respect @Exclude() decorators
+        const serializedData = classToPlain(data);
+
         // Extract message if it exists in the response data
         let message = 'Success';
-        let responseData = data;
+        let responseData: any = serializedData;
 
         // If the controller returns an object with ONLY a 'message' field, use it as the message
         // Otherwise, treat the entire object as data (including entities with message properties)
-        if (data && typeof data === 'object' && 'message' in data && Object.keys(data).length === 1) {
-          message = data.message;
+        if (serializedData && typeof serializedData === 'object' && 'message' in serializedData && Object.keys(serializedData).length === 1) {
+          message = serializedData.message;
           responseData = null;
-        } else if (data && typeof data === 'object' && 'message' in data && !('id' in data)) {
+        } else if (serializedData && typeof serializedData === 'object' && 'message' in serializedData && !('id' in serializedData)) {
           // If it has message but no id (not an entity), extract the message
-          message = data.message;
-          const { message: _, ...rest } = data;
+          message = serializedData.message;
+          const { message: _, ...rest } = serializedData;
           responseData = Object.keys(rest).length > 0 ? rest : null;
         }
 
@@ -33,7 +37,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
           statusCode: response.statusCode,
           message,
           data: responseData,
-        };
+        } as ApiResponse<T>;
       }),
     );
   }
